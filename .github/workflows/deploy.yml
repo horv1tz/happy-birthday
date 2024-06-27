@@ -57,12 +57,12 @@ jobs:
             fi
             mkdir -p /tmp/deploy
           "
-          scp -r . $USER@$SERVER:/tmp/deploy
+          scp -r dist/* $USER@$SERVER:/tmp/deploy
           ssh -o StrictHostKeyChecking=no $USER@$SERVER "
             cd /tmp/deploy
             npm install
             npm run build
             rm -rf /var/www/birth.horvitz.ru/*
-            mv /tmp/deploy/dist/* /var/www/birth.horvitz.ru/
+            mv /tmp/deploy/* /var/www/birth.horvitz.ru/
             rm -rf /tmp/deploy
           "
