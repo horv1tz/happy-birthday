@@ -49,6 +49,7 @@ jobs:
           SERVER: ${{ secrets.SERVER }}
           USER: ${{ secrets.USER }}
         run: |
+          eval "$(ssh-agent -s)"
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
           ssh -o StrictHostKeyChecking=no $USER@$SERVER "
             if [ ! -d /var/www/birth.horvitz.ru ]; then
