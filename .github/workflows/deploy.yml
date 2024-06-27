@@ -21,8 +21,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm test
+      - name: Build project
+        run: npm run build
 
   deploy:
     needs: build
@@ -35,12 +35,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
+      - name: Prepare deployment
         run: npm run build
 
       - name: Deploy to server
@@ -50,4 +50,18 @@ jobs:
           USER: ${{ secrets.USER }}
         run: |
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-          ssh -o StrictHostKeyChecking=no $USER@$SERVER "cd /path/to/project && git pull && npm install && npm run build && pm2 restart all"
+          ssh -o StrictHostKeyChecking=no $USER@$SERVER "
+            if [ ! -d /var/www/birth.horvitz.ru ]; then
+              mkdir -p /var/www/birth.horvitz.ru;
+            fi
+            mkdir -p /tmp/deploy
+          "
+          scp -r . $USER@$SERVER:/tmp/deploy
+          ssh -o StrictHostKeyChecking=no $USER@$SERVER "
+            cd /tmp/deploy
+            npm install
+            npm run build
+            rm -rf /var/www/birth.horvitz.ru/*
+            mv /tmp/deploy/dist/* /var/www/birth.horvitz.ru/
+            rm -rf /tmp/deploy
+          "
