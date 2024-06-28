@@ -5,12 +5,12 @@ const App: Component = () => {
   const targetDate = "2024-07-13T00:00:00"; // Установите нужную вам дату и время
 
   return (
-    <>
+    <main>
       <p class="text-4xl text-center py-20">A little time...</p>
       <div class="clock">
         <Countdown targetDate={targetDate} />
       </div>
-    </>
+    </main>
   );
 };
 
