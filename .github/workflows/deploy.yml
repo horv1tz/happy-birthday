@@ -1,4 +1,4 @@
-name: Node.js CI/CD
+name: Деплой сайта на сервер
 
 on:
   push:
