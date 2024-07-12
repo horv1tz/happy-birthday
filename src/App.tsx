@@ -6,7 +6,7 @@ const App: Component = () => {
 
   return (
     <main>
-      <p class="text-4xl text-center py-20">День рождения через...</p>
+      <p class="text-4xl text-center py-20">День рождение через...</p>
       <div class="clock">
         <Countdown targetDate={targetDate} />
       </div>
