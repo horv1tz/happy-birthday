@@ -33,4 +33,4 @@ jobs:
           eval "$(ssh-agent -s)"
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
           ssh -o StrictHostKeyChecking=no $USER@$SERVER "mkdir -p /var/www/birth.horvitz.ru"
-          rsync -avz --delete dist/ $USER@$SERVER:/var/www/birth.horvitz.ru/
+          scp -r dist/* $USER@$SERVER:/var/www/birth.horvitz.ru/
