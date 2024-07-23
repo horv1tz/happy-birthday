@@ -2,7 +2,7 @@ import { Component } from "solid-js";
 import Countdown from "./components/Countdown";
 
 const App: Component = () => {
-  const targetDate = "2024-07-13T00:00:00"; // Установите нужную вам дату и время
+  const targetDate = "2025-07-13T00:00:00"; // Установите нужную вам дату и время
 
   return (
     <main>
