@@ -7,7 +7,6 @@ on:
 
 jobs:
   deploy:
-    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -33,18 +32,5 @@ jobs:
         run: |
           eval "$(ssh-agent -s)"
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-          ssh -o StrictHostKeyChecking=no $USER@$SERVER "
-            if [ ! -d /var/www/birth.horvitz.ru ]; then
-              mkdir -p /var/www/birth.horvitz.ru;
-            fi
-            mkdir -p /tmp/deploy
-          "
-          scp -r dist/* $USER@$SERVER:/tmp/deploy
-          ssh -o StrictHostKeyChecking=no $USER@$SERVER "
-            cd /tmp/deploy
-            npm install
-            npm run build
-            rm -rf /var/www/birth.horvitz.ru/*
-            mv /tmp/deploy/* /var/www/birth.horvitz.ru/
-            rm -rf /tmp/deploy
-          "
+          ssh -o StrictHostKeyChecking=no $USER@$SERVER "mkdir -p /var/www/birth.horvitz.ru"
+          rsync -avz --delete dist/ $USER@$SERVER:/var/www/birth.horvitz.ru/
