@@ -3,11 +3,13 @@ name: Деплой сайта на сервер
 on:
   push:
     branches:
-      - main 
+      - main
 
 jobs:
-  deploy:
+  setup:
     runs-on: ubuntu-latest
+    outputs:
+      node-cache-path: ${{ steps.cache.outputs.cache-hit }}
 
     steps:
       - name: Checkout repository
@@ -18,11 +20,53 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Cache Node.js dependencies
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm install
+
+  build:
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install dependencies from cache
+        run: npm ci
 
       - name: Build deployment
         run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-dist
+          path: dist/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: build-dist
 
       - name: Deploy to server
         env:
@@ -32,5 +76,6 @@ jobs:
         run: |
           eval "$(ssh-agent -s)"
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-          ssh -o StrictHostKeyChecking=no $USER@$SERVER "mkdir -p /var/www/birth.horvitz.ru"
-          scp -r dist/* $USER@$SERVER:/var/www/birth.horvitz.ru/
+          ssh -o StrictHostKeyChecking=no $USER@$SERVER "rm -rf /var/www/birth.horvitz.ru/* && mkdir -p /var/www/birth.horvitz.ru"
+          rsync -avz --delete dist/ $USER@$SERVER:/var/www/birth.horvitz.ru/
+          ssh-agent -k
